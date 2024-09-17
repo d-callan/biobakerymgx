@@ -1,40 +1,47 @@
 nextflow_process {
 
-    name "Test Process HUMANN_DOWNLOADUNIREFDB"
+    name "Test Process HUMANN_JOIN"
     script "../main.nf"
-    process "HUMANN_DOWNLOADUNIREFDB"
+    process "HUMANN_JOIN"
     config "./nextflow.config"
 
     tag "modules"
     tag "modules_nfcore"
     tag "humann"
-    tag "humann/downloadunireflandb"
+    tag "humann/join"
 
-    test("DEMO_diamond") {
+    test("humann/join") {
         when {
             process {
                 """
-                input[0] = "DEMO_diamond"
+                input[0] = TODO - first is a path to a dir w files matching the below pattern
+                input[1] = "genefamilies"
                 """
             }
         }
 
         then {
-            assertAll(
+            assertAll (
                 { assert process.success },
-                { assert snapshot(process.out).match() }
+                { assert snapshot(
+                    process.out.joined
+                    process.out.versions
+                    ).match()
+                },
+                { assert path(process.out.log[0][1]).text.contains("TODO a line indicates its running and gives a version, hopefully?") }
             )
         }
     }
 
-    test("DEMO_diamond - stub") {
+    test("humann/join - stub") {
 
         options "-stub"
 
         when {
             process {
                 """
-                input[0] = "DEMO_diamond"
+                input[0] = TODO - first is a path to a dir w files matching the below pattern
+                input[1] = "genefamilies"
                 """
             }
         }

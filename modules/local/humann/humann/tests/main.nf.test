@@ -10,37 +10,103 @@ nextflow_process {
     tag "humann"
     tag "humann/humann"
 
-    test("DEMO_diamond") {
-        when {
+    setup {
+        run("HUMANN_DOWNLOADCHOCOPHLANDB") {
+            script "../../downloadchocophlandb/main.nf"
             process {
                 """
-                input[0] = "DEMO_diamond"
+                input[0] = 'TODO - some chochophlan db version - or maybe skip this setup and build in a mini test db'
                 """
             }
         }
 
+        run("HUMANN_DOWNLOADUNIREFDB") {
+            script "../../downloadunirefdb/main.nf"
+            process {
+                """
+                input[0] = 'TODO - some uniref db version - or maybe skip this setup and build in a mini test db'
+                """
+            }
+        }
+    }
+
+    test("kneaded fastq.gz") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id: 'test' ],
+                        [
+                            file(params.modules_testdata_base_path + "TODO_some_kneaded_1.fastq.gz", checkIfExists: true),
+                            file(params.modules_testdata_base_path + "TODO_some_kneaded_2.fastq.gz", checkIfExists: true)
+                        ]
+                    ]
+                )
+                input[1] = Channel.of(
+                    [
+                        [id: 'test'],
+                        [
+                            file(params.modules_testdata_base_path + "TODO_some_metaphlan_profile.tsv", checkIfExists: true)
+                        ]
+                    ]
+                )
+                input[2] = HUMANN_DOWNLOADCHOCOPHLANDB.out.chocophlan_db
+                input[3] = HUMANN_DOWNLOADUNIREFDB.out.uniref_db
+                """
+            }
+        }
+
+
         then {
-            assertAll(
+            assertAll (
                 { assert process.success },
-                { assert snapshot(process.out).match() }
+                { assert snapshot(
+                    process.out.genefamilies
+                    process.out.pathabundance
+                    process.out.pathcoverage,
+                    process.out.versions
+                    ).match()
+                },
+                { assert path(process.out.log[0][1]).text.contains("TODO a line indicates its running and gives a version, hopefully?") }
             )
         }
     }
 
-    test("DEMO_diamond - stub") {
+    test("kneaded fastq.gz - stub") {
 
         options "-stub"
 
         when {
             process {
                 """
-                input[0] = "DEMO_diamond"
+                input[0] = Channel.of(
+                    [
+                        [ id: 'test' ],
+                        [
+                            file(params.modules_testdata_base_path + "TODO_some_kneaded_1.fastq.gz", checkIfExists: true),
+                            file(params.modules_testdata_base_path + "TODO_some_kneaded_2.fastq.gz", checkIfExists: true)
+                        ]
+                    ]
+                )
+                input[1] = Channel.of(
+                    [
+                        [id: 'test'],
+                        [
+                            file(params.modules_testdata_base_path + "TODO_some_metaphlan_profile.tsv", checkIfExists: true)
+                        ]
+                    ]
+                )
+                input[2] = HUMANN_DOWNLOADCHOCOPHLANDB.out.chocophlan_db
+                input[3] = HUMANN_DOWNLOADUNIREFDB.out.uniref_db
                 """
             }
         }
 
+
         then {
-            assertAll(
+            assertAll (
                 { assert process.success },
                 { assert snapshot(process.out).match() }
             )

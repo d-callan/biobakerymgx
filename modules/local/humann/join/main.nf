@@ -1,5 +1,5 @@
-process HUMANN_DOWNLOADUNIREFDB {
-    label 'process_single'
+process HUMANN_JOIN {
+    label 'process_low'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -7,23 +7,25 @@ process HUMANN_DOWNLOADUNIREFDB {
         'biocontainers/humann:3.8--pyh7cba7a3_0' }"
 
     input:
-    val uniref_db_version
+    path(input_dir)
+    val file_name_pattern
 
     output:
-    path("uniref")      , emit: uniref_db
-    path "versions.yml" , emit: versions
-
-    when:
-    task.ext.when == null || task.ext.when
+    path("*_joined.tsv.gz"), emit: joined
+    path "versions.yml"    , emit: versions
 
     script:
     def args = task.ext.args ?: ''
     """
-    humann_databases \\
-        --download uniref \\
-        ${uniref_db_version} \\
-        . \\
+    if compgen -G "$input_dir/*$file_name_pattern*.gz" > /dev/null; then
+        find $input_dir \( -name '*$file_name_pattern*' \) -exec gunzip --verbose {} \;
+    fi
+    humann_join_table \\
+        --input $input_dir \\
+        --output ${file_name_pattern}_joined.tsv \\
+        --file_name $file_name_pattern \\
         ${args}
+    gzip -n ${file_name_pattern}_joined.tsv
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         humann: \$(echo \$(humann --version 2>&1 | sed 's/^.*humann //; s/Using.*\$//' ))
@@ -31,9 +33,8 @@ process HUMANN_DOWNLOADUNIREFDB {
     """
 
     stub:
-    def args = task.ext.args ?: ''
     """
-    mkdir uniref
+    touch ${file_name_pattern}_joined.tsv.gz
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         humann: \$(echo \$(humann --version 2>&1 | sed 's/^.*humann //; s/Using.*\$//' ))

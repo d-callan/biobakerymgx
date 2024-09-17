@@ -1,5 +1,6 @@
-process HUMANN_DOWNLOADUNIREFDB {
-    label 'process_single'
+process HUMANN_RENAME {
+    tag "$meta.id"
+    label 'process_low'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -7,23 +8,28 @@ process HUMANN_DOWNLOADUNIREFDB {
         'biocontainers/humann:3.8--pyh7cba7a3_0' }"
 
     input:
-    val uniref_db_version
+    tuple val(meta), path(input)
+    val names
 
     output:
-    path("uniref")      , emit: uniref_db
-    path "versions.yml" , emit: versions
-
-    when:
-    task.ext.when == null || task.ext.when
+    tuple val(meta), path("*_renamed.tsv.gz"), emit: renamed
+    path "versions.yml"                      , emit: versions
 
     script:
     def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    humann_databases \\
-        --download uniref \\
-        ${uniref_db_version} \\
-        . \\
+    if [[ $input == *.gz ]]; then
+        gunzip -c $input > input.tsv
+    else
+        mv $input input.tsv
+    fi
+    humann_rename_table \\
+        --input input.tsv \\
+        --output ${prefix}_${names}_rename.tsv \\
+        --names $names \\
         ${args}
+    gzip -n ${prefix}_${names}_rename.tsv
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         humann: \$(echo \$(humann --version 2>&1 | sed 's/^.*humann //; s/Using.*\$//' ))
@@ -31,9 +37,9 @@ process HUMANN_DOWNLOADUNIREFDB {
     """
 
     stub:
-    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    mkdir uniref
+    touch ${prefix}_${names}_rename.tsv
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         humann: \$(echo \$(humann --version 2>&1 | sed 's/^.*humann //; s/Using.*\$//' ))

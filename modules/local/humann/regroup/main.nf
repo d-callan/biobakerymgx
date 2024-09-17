@@ -1,4 +1,5 @@
-process HUMANN_DOWNLOADUNIREFDB {
+process HUMANN_REGROUP {
+    tag "$meta.id"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -7,23 +8,28 @@ process HUMANN_DOWNLOADUNIREFDB {
         'biocontainers/humann:3.8--pyh7cba7a3_0' }"
 
     input:
-    val uniref_db_version
+    tuple val(meta), path(input)
+    val groups
 
     output:
-    path("uniref")      , emit: uniref_db
-    path "versions.yml" , emit: versions
-
-    when:
-    task.ext.when == null || task.ext.when
+    tuple val(meta), path("*_regroup.tsv.gz"), emit: regroup
+    path "versions.yml"                      , emit: versions
 
     script:
     def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    humann_databases \\
-        --download uniref \\
-        ${uniref_db_version} \\
-        . \\
+    if [[ $input == *.gz ]]; then
+        gunzip -c $input > input.tsv
+    else
+        mv $input input.tsv
+    fi
+    humann_regroup_table \\
+        --input input.tsv \\
+        --output ${prefix}_${groups}_regroup.tsv \\
+        --groups $groups \\
         ${args}
+    gzip -n ${prefix}_${groups}_regroup.tsv
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         humann: \$(echo \$(humann --version 2>&1 | sed 's/^.*humann //; s/Using.*\$//' ))
@@ -31,9 +37,9 @@ process HUMANN_DOWNLOADUNIREFDB {
     """
 
     stub:
-    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    mkdir uniref
+    touch ${prefix}_${groups}_regroup.tsv.gz
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         humann: \$(echo \$(humann --version 2>&1 | sed 's/^.*humann //; s/Using.*\$//' ))

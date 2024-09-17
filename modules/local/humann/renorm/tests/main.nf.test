@@ -1,40 +1,61 @@
 nextflow_process {
 
-    name "Test Process HUMANN_DOWNLOADUNIREFDB"
+    name "Test Process HUMANN_RENORM"
     script "../main.nf"
-    process "HUMANN_DOWNLOADUNIREFDB"
+    process "HUMANN_RENORM"
     config "./nextflow.config"
 
     tag "modules"
     tag "modules_nfcore"
     tag "humann"
-    tag "humann/downloadunireflandb"
+    tag "humann/renorm"
 
-    test("DEMO_diamond") {
+    test("humann/renorm") {
         when {
             process {
                 """
-                input[0] = "DEMO_diamond"
+                input[0] = Channel.of(
+                    [
+                        [id: 'test'],
+                        [
+                            file(params.modules_testdata_base_path + "TODO_some_genefamilies.tsv", checkIfExists: true)
+                        ]
+                    ]
+                )
+                input[1] = "cpm"
                 """
             }
         }
 
         then {
-            assertAll(
+            assertAll (
                 { assert process.success },
-                { assert snapshot(process.out).match() }
+                { assert snapshot(
+                    process.out.renorm
+                    process.out.versions
+                    ).match()
+                },
+                { assert path(process.out.log[0][1]).text.contains("TODO a line indicates its running and gives a version, hopefully?") }
             )
         }
     }
 
-    test("DEMO_diamond - stub") {
+    test("humann/renorm - stub") {
 
         options "-stub"
 
         when {
             process {
                 """
-                input[0] = "DEMO_diamond"
+                input[0] = Channel.of(
+                    [
+                        [id: 'test'],
+                        [
+                            file(params.modules_testdata_base_path + "TODO_some_genefamilies.tsv", checkIfExists: true)
+                        ]
+                    ]
+                )
+                input[1] = "cpm"
                 """
             }
         }
