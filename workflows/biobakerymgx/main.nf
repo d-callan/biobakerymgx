@@ -9,6 +9,7 @@
 //
 include { FASTQ_READ_PREPROCESSING_KNEADDATA    } from '../../subworkflows/local/fastq_read_preprocessing_kneaddata/main'
 include { FASTQ_READ_TAXONOMY_METAPHLAN         } from '../../subworkflows/local/fastq_read_taxonomy_metaphlan/main'
+include { FASTQ_MICROBIAL_PATHWAY_HUMANN        } from '../../subworkflows/local/fastq_microbial_pathway_humann/main'
 
 
 /*
@@ -130,7 +131,7 @@ workflow BIOBAKERYMGX {
         Taxonomic classification: MetaPhlAn
     -----------------------------------------------------------------------------------*/
     if ( params.run_metaphlan ) {
-        // create channel from params.kneaddata_db
+        // create channel from params.metaphlan_db
         if ( !params.metaphlan_db ){
             ch_metaphlan_db = null
         } else {
@@ -146,12 +147,62 @@ workflow BIOBAKERYMGX {
         //
         // SUBWORKFLOW: MetaPhlAn
         //
-        ch_read_taxonomy_tsv = FASTQ_READ_TAXONOMY_METAPHLAN ( ch_preprocessed_fastq_gz, ch_metaphlan_sgb2gtbd_file, ch_metaphlan_db, params.metaphlan_db_version ).metaphlan_profiles_merged_tsv
+        ch_read_taxonomy_tsv = FASTQ_READ_TAXONOMY_METAPHLAN (
+            ch_preprocessed_fastq_gz,
+            ch_metaphlan_sgb2gtbd_file,
+            ch_metaphlan_db,
+            params.metaphlan_db_version
+        ).metaphlan_profiles_merged_tsv
         ch_versions = ch_versions.mix(FASTQ_READ_TAXONOMY_METAPHLAN.out.versions)
     } else {
         ch_read_taxonomy_tsv = Channel.empty()
     }
 
+
+    /*-----------------------------------------------------------------------------------
+        Functional classification: HUMAnN
+    -----------------------------------------------------------------------------------*/
+    if ( params.run_humann ) {
+        // create channel from params.chochophlan_db
+        if ( !params.chocophlan_db ) {
+            ch_chochophlan_db = null
+        } else {
+            ch_chochophlan_db = Channel.value( file( params.chochophlan_db, checkIfExists: true ) )
+        }
+
+        // create channel from params.uniref_db
+        if ( !params.uniref_db ) {
+            ch_uniref_db = null
+        } else {
+            ch_uniref_db = Channel.value( file( params.uniref_db, checkIfExists: true ) )
+        }
+
+        // theres probably a better way to handle this. but good enough for me for now..
+        if ( !params.run_metaphlan ) {
+            error "Error: run_humann is true but run_metaphlan is false. Cannot run HUMAnN without MetaPhlAn."
+        }
+
+        //
+        // SUBWORKFLOW: HUMAnN
+        //
+        // TODO double check the metaphlan output channel. not sure its the format i was expecting in the module
+        ch_genefamilies_tsv = FASTQ_MICROBIAL_PATHWAY_HUMANN(
+            ch_preprocessed_fastq_gz,
+            ch_read_taxonomy_tsv,
+            ch_chochophlan_db,
+            params.chochophlan_db_version,
+            ch_uniref_db,
+            params.uniref_db_version).humann_genefamilies
+        ch_ec_tsv = FASTQ_MICROBIAL_PATHWAY_HUMANN.out.humann_ec
+        ch_pathabundance_tsv = FASTQ_MICROBIAL_PATHWAY_HUMANN.out.humann_pathabundance
+        ch_pathcoverage_tsv = FASTQ_MICROBIAL_PATHWAY_HUMANN.out.humann_pathcoverage
+        ch_versions = ch_versions.mix(FASTQ_MICROBIAL_PATHWAY_HUMANN.out.versions)
+    } else {
+        ch_genefamilies_tsv = Channel.empty()
+        ch_ec_tsv = Channel.empty()
+        ch_pathabundance_tsv = Channel.empty()
+        ch_pathcoverage_tsv = Channel.empty()
+    }
 
 
     /*-----------------------------------------------------------------------------------
@@ -192,6 +243,10 @@ workflow BIOBAKERYMGX {
     preprocessed_fastq_gz           = ch_preprocessed_fastq_gz
     preprocessed_read_counts_tsv    = ch_preprocessed_read_counts_tsv
     read_taxonomy_tsv               = ch_read_taxonomy_tsv
+    genefamilies_tsv                = ch_genefamilies_tsv
+    ec_tsv                          = ch_ec_tsv
+    pathabundance_tsv               = ch_pathabundance_tsv
+    pathcoverage_tsv                = ch_pathcoverage_tsv
     multiqc_report                  = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions                        = ch_versions
 }
