@@ -1,0 +1,2 @@
+fastq_microbial_pathway_humann_default:
+  - subworkflows/local/fastq_microbial_pathway_humann/**

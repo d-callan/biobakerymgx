@@ -5,7 +5,10 @@
 include { HUMANN_DOWNLOADCHOCOPHLANDB      } from '../../../modules/local/humann/downloadchocophlandb/main'
 include { HUMANN_DOWNLOADUNIREFDB          } from '../../../modules/local/humann/downloadunirefdb/main'
 include { HUMANN_HUMANN                    } from '../../../modules/local/humann/humann/main'
-include { HUMANN_JOIN                      } from '../../../modules/local/humann/join/main'
+include { HUMANN_JOIN as JOIN_GENES        } from '../../../modules/local/humann/join/main'
+include { HUMANN_JOIN as JOIN_PATHABUND    } from '../../../modules/local/humann/join/main'
+include { HUMANN_JOIN as JOIN_PATHCOV      } from '../../../modules/local/humann/join/main'
+include { HUMANN_JOIN as JOIN_EC           } from '../../../modules/local/humann/join/main'
 include { HUMANN_REGROUP                   } from '../../../modules/local/humann/regroup/main'
 include { HUMANN_RENAME                    } from '../../../modules/local/humann/rename/main'
 include { HUMANN_RENORM                    } from '../../../modules/local/humann/renorm/main'
@@ -69,22 +72,45 @@ workflow FASTQ_MICROBIAL_PATHWAY_HUMANN {
     //
     // MODULE: regroup cpm gene families to EC numbers
     //
-    ch_humann_ec = HUMANN_REGROUP( ch_humann_genefamilies_cpm, 'ec').regroup // TODO make sure 'ec' is still valid arg
+    ch_humann_ec = HUMANN_REGROUP(ch_humann_genefamilies_cpm, 'ec').regroup // TODO make sure 'ec' is still valid arg
     ch_versions = ch_versions.mix(HUMANN_REGROUP.out.versions)
 
     //
     // MODULE: rename ec number outputs to include descriptors
     //
-    ch_humann_ec_renamed = HUMANN_RENAME (ch_humann_ec, 'ec').rename // TODO make sure 'ec' is valid arg
+    ch_humann_ec_renamed = HUMANN_RENAME(ch_humann_ec, 'ec').rename // TODO make sure 'ec' is valid arg
     ch_versions = ch_versions.mix(HUMANN_RENAME.out.versions)
 
-    // TODO join all outputs as necessary, then update emit below
-    // TODO need to modify modules to return output dirs i suppose first, so they can be passed to join module
+    //
+    // MODULE: join gene abundances across all samples into one file
+    //
+    // the paths should all be the same, so im taking the first.
+    // should probably be validated though, im just short of time..
+    ch_humann_genefamilies_cpm_path = ch_humann_genefamilies_cpm.map{ toCanonicalPath(it[1]) }.unique().take(1)
+    ch_humann_genefamilies_joined = JOIN_GENES(ch_humann_genefamilies_cpm_path, 'genefamilies')
+
+    //
+    // MODULE: join ec abundances across all samples into one file
+    //
+    ch_humann_ec_renamed_path = ch_humann_ec_renamed.map{ toCanonicalPath(it[1]) }.unique().take(1)
+    ch_humann_ec_joined = JOIN_EC(ch_humann_ec_renamed_path, 'ec') // TODO check the file name pattern
+
+    //
+    // MODULE: join pathway abundances across all samples into one file
+    //
+    ch_humann_pathabundance_path = ch_humann_pathabundance_raw.map{ toCanonicalPath(it[1]) }.unique().take(1)
+    ch_humann_pathabundance_joined = JOIN_PATHABUND(ch_humann_pathabundance_path, 'pathabundance')
+
+    //
+    // MODULE: join pathway coverage across all samples into one file
+    //
+    ch_humann_pathcoverage_path = ch_humann_pathcoverage_raw.map{ toCanonicalPath(it[1]) }.unique().take(1)
+    ch_humann_pathcoverage_joined = JOIN_PATHCOV(ch_humann_pathcoverage_path, 'pathcoverage')
 
     emit:
-    humann_genefamilies_cpm   = ch_humann_genefamilies_cpm        // channel: [ val(meta), [ reads_1.fastq.gz, reads_2.fastq.gz  ] ]
-    humann_ec                 = ch_humann_ec_renamed              // channel: [ val(meta), read_counts.tsv ]
-    humann_pathabundance      = ch_humann_pathabundance_raw       // channel: [ val(meta), pathabundance.tsv ]
-    humann_pathcoverage       = ch_humann_pathcoverage_raw        // channel: [ val(meta), pathcoverage.tsv ]
+    humann_genefamilies       = ch_humann_genefamilies_joined     // channel: [ val(meta), [ reads_1.fastq.gz, reads_2.fastq.gz  ] ]
+    humann_ec                 = ch_humann_ec_joined               // channel: [ val(meta), read_counts.tsv ]
+    humann_pathabundance      = ch_humann_pathabundance_joined    // channel: [ val(meta), pathabundance.tsv ]
+    humann_pathcoverage       = ch_humann_pathcoverage_joined     // channel: [ val(meta), pathcoverage.tsv ]
     versions                  = ch_versions                       // channel: [ versions.yml ]
 }

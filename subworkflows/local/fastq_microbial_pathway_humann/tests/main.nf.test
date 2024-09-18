@@ -1,0 +1,54 @@
+nextflow_workflow {
+
+    name "Test Subworkflow: FASTQ_MICROBIAL_PATHWAY_HUMANN"
+    script "../main.nf"
+    workflow "FASTQ_MICROBIAL_PATHWAY_HUMANN"
+
+    tag "subworkflows"
+    tag "subworkflows_local"
+    tag "fastq_microbial_pathway_humann"
+    tag "fastq_microbial_pathway_humann_default"
+
+
+    // TODO update inputs here, these are copied from the metaphlan subworkflow which obviously isnt what we actually need here
+    // the first should be processed fastq
+    // the second should be metaphlan profile output from that subworkflow
+    // the third is chocophlan db, either that or a chocophlan db version as fourth input should be provided (multiple tests)
+    // the fifth is uniref db, either that or a uniref db version as sixth input should be provided (multiple tests)
+
+    test("fastq.gz") {
+
+        when {
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id: 'test' ],
+                        [
+                            file(params.modules_testdata_base_path + "genomics/sarscov2/illumina/fastq/test_1.fastq.gz", checkIfExists: true),
+                            file(params.modules_testdata_base_path + "genomics/sarscov2/illumina/fastq/test_2.fastq.gz", checkIfExists: true)
+                        ]
+                    ],
+                    [
+                        [ id: 'test2' ],
+                        [
+                            file(params.modules_testdata_base_path + "genomics/sarscov2/illumina/fastq/test2_1.fastq.gz", checkIfExists: true),
+                            file(params.modules_testdata_base_path + "genomics/sarscov2/illumina/fastq/test2_2.fastq.gz", checkIfExists: true)
+                        ]
+                    ]
+                )
+                input[1] = "https://github.com/biobakery/MetaPhlAn/raw/master/metaphlan/utils/mpa_vOct22_CHOCOPhlAnSGB_202212_SGB2GTDB.tsv"
+                input[2] = null
+                input[3] = 'mpa_vJan21_TOY_CHOCOPhlAnSGB_202103'
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert snapshot(workflow.out).match() }
+            )
+        }
+    }
+}
