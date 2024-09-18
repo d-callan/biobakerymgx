@@ -44,6 +44,10 @@ nextflow_workflow {
                     workflow.out.preprocessed_fastq_gz,
                     workflow.out.preprocessed_read_counts_tsv,
                     workflow.out.read_taxonomy_tsv,
+                    workflow.out.genefamilies_tsv,
+                    workflow.out.ec_tsv,
+                    workflow.out.pathabundance_tsv,
+                    workflow.out.pathcoverage_tsv,
                     workflow.out.versions
                     ).match()
                 },
