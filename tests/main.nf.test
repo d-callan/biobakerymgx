@@ -14,6 +14,7 @@ nextflow_pipeline {
                 kneaddata_db_version    = 'human_genome'
                 run_metaphlan           = true
                 metaphlan_db_version    = 'mpa_vJan21_TOY_CHOCOPhlAnSGB_202103'
+                run_humann              = true
             }
         }
 
