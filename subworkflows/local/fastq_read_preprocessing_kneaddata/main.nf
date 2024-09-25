@@ -31,7 +31,7 @@ workflow FASTQ_READ_PREPROCESSING_KNEADDATA {
     //
     // MODULE: Trim and remove human reads
     //
-    ch_preprocessed_reads_fastq_gz = KNEADDATA_KNEADDATA ( raw_reads_fastq_gz, ch_kneaddata_db.first() ).preprocessed_reads
+    ch_preprocessed_reads_fastq_gz = KNEADDATA_KNEADDATA ( raw_reads_fastq_gz, ch_kneaddata_db ).preprocessed_reads
     ch_kneaddata_logs = KNEADDATA_KNEADDATA.out.kneaddata_log
     ch_versions = ch_versions.mix(KNEADDATA_KNEADDATA.out.versions)
 

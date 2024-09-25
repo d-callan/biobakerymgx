@@ -33,7 +33,7 @@ workflow FASTQ_READ_TAXONOMY_METAPHLAN {
     //
     // MODULE: Trim and remove human reads
     //
-    ch_metaphlan_profile_txt = METAPHLAN_METAPHLAN ( preprocessed_reads_fastq_gz, ch_metaphlan_db.first() ).profile
+    ch_metaphlan_profile_txt = METAPHLAN_METAPHLAN ( preprocessed_reads_fastq_gz, ch_metaphlan_db ).profile
     ch_versions = ch_versions.mix(METAPHLAN_METAPHLAN.out.versions)
 
     //
