@@ -12,24 +12,18 @@ process HUMANN_REGROUP {
     val groups
 
     output:
-    tuple val(meta), path("*_regroup.tsv.gz"), emit: regroup
+    tuple val(meta), path("*_regroup.tsv")   , emit: regroup
     path "versions.yml"                      , emit: versions
 
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    if [[ $input == *.gz ]]; then
-        gunzip -c $input > input.tsv
-    else
-        mv $input input.tsv
-    fi
     humann_regroup_table \\
         --input input.tsv \\
         --output ${prefix}_${groups}_regroup.tsv \\
         --groups $groups \\
         ${args}
-    gzip -n ${prefix}_${groups}_regroup.tsv
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         humann: \$(echo \$(humann --version 2>&1 | sed 's/^.*humann //; s/Using.*\$//' ))
@@ -39,7 +33,7 @@ process HUMANN_REGROUP {
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}_${groups}_regroup.tsv.gz
+    touch ${prefix}_${groups}_regroup.tsv
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         humann: \$(echo \$(humann --version 2>&1 | sed 's/^.*humann //; s/Using.*\$//' ))

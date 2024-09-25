@@ -11,21 +11,17 @@ process HUMANN_JOIN {
     val file_name_pattern
 
     output:
-    path("*_joined.tsv.gz"), emit: joined
+    path("*_joined.tsv")   , emit: joined
     path "versions.yml"    , emit: versions
 
     script:
     def args = task.ext.args ?: ''
     """
-    if compgen -G "$input_dir/*$file_name_pattern*.gz" > /dev/null; then
-        find $input_dir \( -name '*$file_name_pattern*' \) -exec gunzip --verbose {} \;
-    fi
     humann_join_table \\
         --input $input_dir \\
         --output ${file_name_pattern}_joined.tsv \\
         --file_name $file_name_pattern \\
         ${args}
-    gzip -n ${file_name_pattern}_joined.tsv
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         humann: \$(echo \$(humann --version 2>&1 | sed 's/^.*humann //; s/Using.*\$//' ))
@@ -34,7 +30,7 @@ process HUMANN_JOIN {
 
     stub:
     """
-    touch ${file_name_pattern}_joined.tsv.gz
+    touch ${file_name_pattern}_joined.tsv
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         humann: \$(echo \$(humann --version 2>&1 | sed 's/^.*humann //; s/Using.*\$//' ))

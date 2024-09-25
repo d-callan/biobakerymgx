@@ -12,24 +12,18 @@ process HUMANN_RENAME {
     val names
 
     output:
-    tuple val(meta), path("*_renamed.tsv.gz"), emit: renamed
+    tuple val(meta), path("*_renamed.tsv")   , emit: renamed
     path "versions.yml"                      , emit: versions
 
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    if [[ $input == *.gz ]]; then
-        gunzip -c $input > input.tsv
-    else
-        mv $input input.tsv
-    fi
     humann_rename_table \\
         --input input.tsv \\
         --output ${prefix}_${names}_rename.tsv \\
         --names $names \\
         ${args}
-    gzip -n ${prefix}_${names}_rename.tsv
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         humann: \$(echo \$(humann --version 2>&1 | sed 's/^.*humann //; s/Using.*\$//' ))
