@@ -78,7 +78,7 @@ workflow FASTQ_MICROBIAL_PATHWAY_HUMANN {
     //
     // MODULE: rename ec number outputs to include descriptors
     //
-    ch_humann_ec_renamed = HUMANN_RENAME(ch_humann_ec, 'ec').rename // TODO make sure 'ec' is valid arg
+    ch_humann_ec_renamed = HUMANN_RENAME(ch_humann_ec, 'ec').renamed // TODO make sure 'ec' is valid arg
     ch_versions = ch_versions.mix(HUMANN_RENAME.out.versions)
 
     //
@@ -87,28 +87,28 @@ workflow FASTQ_MICROBIAL_PATHWAY_HUMANN {
     // the paths should all be the same, so im taking the first.
     // should probably be validated though, im just short of time..
     ch_humann_genefamilies_cpm_path = ch_humann_genefamilies_cpm.map{ toCanonicalPath(it[1]) }.unique().take(1)
-    ch_humann_genefamilies_joined = JOIN_GENES(ch_humann_genefamilies_cpm_path, 'genefamilies')
+    ch_humann_genefamilies_joined = JOIN_GENES(ch_humann_genefamilies_cpm_path, 'genefamilies').joined
 
     //
     // MODULE: join ec abundances across all samples into one file
     //
     ch_humann_ec_renamed_path = ch_humann_ec_renamed.map{ toCanonicalPath(it[1]) }.unique().take(1)
-    ch_humann_ec_joined = JOIN_EC(ch_humann_ec_renamed_path, 'ec') // TODO check the file name pattern
+    ch_humann_ec_joined = JOIN_EC(ch_humann_ec_renamed_path, 'ec').joined // TODO check the file name pattern
 
     //
     // MODULE: join pathway abundances across all samples into one file
     //
     ch_humann_pathabundance_path = ch_humann_pathabundance_raw.map{ toCanonicalPath(it[1]) }.unique().take(1)
-    ch_humann_pathabundance_joined = JOIN_PATHABUND(ch_humann_pathabundance_path, 'pathabundance')
+    ch_humann_pathabundance_joined = JOIN_PATHABUND(ch_humann_pathabundance_path, 'pathabundance').joined
 
     //
     // MODULE: join pathway coverage across all samples into one file
     //
     ch_humann_pathcoverage_path = ch_humann_pathcoverage_raw.map{ toCanonicalPath(it[1]) }.unique().take(1)
-    ch_humann_pathcoverage_joined = JOIN_PATHCOV(ch_humann_pathcoverage_path, 'pathcoverage')
+    ch_humann_pathcoverage_joined = JOIN_PATHCOV(ch_humann_pathcoverage_path, 'pathcoverage').joined
 
     emit:
-    humann_genefamilies       = ch_humann_genefamilies_joined     // channel: [ val(meta), [ reads_1.fastq.gz, reads_2.fastq.gz  ] ]
+    humann_genefamilies       = ch_humann_genefamilies_joined     // channel: [ val(meta), genefamilies.tsv ]
     humann_ec                 = ch_humann_ec_joined               // channel: [ val(meta), read_counts.tsv ]
     humann_pathabundance      = ch_humann_pathabundance_joined    // channel: [ val(meta), pathabundance.tsv ]
     humann_pathcoverage       = ch_humann_pathcoverage_joined     // channel: [ val(meta), pathcoverage.tsv ]
