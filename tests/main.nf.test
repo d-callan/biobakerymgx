@@ -15,6 +15,8 @@ nextflow_pipeline {
                 run_metaphlan           = true
                 metaphlan_db_version    = 'mpa_vJan21_TOY_CHOCOPhlAnSGB_202103'
                 run_humann              = true
+                chocophlan_db_version   = 'DEMO'
+                uniref_db_version       = 'DEMO_diamond'
             }
         }
 

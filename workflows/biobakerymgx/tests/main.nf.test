@@ -33,6 +33,8 @@ nextflow_workflow {
                 outdir                  = "$outputDir"
                 kneaddata_db_version    = 'human_genome'
                 metaphlan_db_version    = 'mpa_vJan21_TOY_CHOCOPhlAnSGB_202103'
+                chocophlan_db_version   = 'DEMO'
+                uniref_db_version       = 'DEMO_diamond'
                 max_cpus                = 1
             }
         }

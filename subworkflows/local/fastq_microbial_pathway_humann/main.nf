@@ -19,7 +19,7 @@ workflow FASTQ_MICROBIAL_PATHWAY_HUMANN {
     processed_reads_fastq_gz      // channel: [ val(meta), [ processed_reads_1.fastq.gz, processed_reads_2.fastq.gz ] ] (MANDATORY)
     metaphlan_profile             // channel: [ val(meta2), metaphlan_profile.tsv ] (MANDATORY)
     chocophlan_db                 // channel: [ chocophlan_db ] (OPTIONAL)
-    chochophlan_db_version        // value: '' (OPTIONAL)
+    chocophlan_db_version        // value: '' (OPTIONAL)
     uniref_db                     // channel: [ uniref_db ] (OPTIONAL)
     uniref_db_version             // value: '' (OPTIONAL)
 
@@ -29,12 +29,12 @@ workflow FASTQ_MICROBIAL_PATHWAY_HUMANN {
 
     // if chocophlan_db exists, skip HUMANN_DOWNLOADCHOCOPHLANDB
     if ( chocophlan_db ){
-        ch_chocophlan_db = chochophlan_db
+        ch_chocophlan_db = chocophlan_db
     } else {
         //
         // MODULE: Download ChocoPhlAn database
         //
-        ch_chocophlan_db = HUMANN_DOWNLOADCHOCOPHLANDB ( chochophlan_db_version ).chochophlan_db
+        ch_chocophlan_db = HUMANN_DOWNLOADCHOCOPHLANDB ( chocophlan_db_version ).chochophlan_db
         ch_versions = ch_versions.mix(HUMANN_DOWNLOADCHOCOPHLANDB.out.versions)
     }
 

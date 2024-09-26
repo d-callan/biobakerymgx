@@ -163,11 +163,11 @@ workflow BIOBAKERYMGX {
         Functional classification: HUMAnN
     -----------------------------------------------------------------------------------*/
     if ( params.run_humann ) {
-        // create channel from params.chochophlan_db
+        // create channel from params.chocophlan_db
         if ( !params.chocophlan_db ) {
-            ch_chochophlan_db = null
+            ch_chocophlan_db = null
         } else {
-            ch_chochophlan_db = Channel.value( file( params.chochophlan_db, checkIfExists: true ) )
+            ch_chocophlan_db = Channel.value( file( params.chocophlan_db, checkIfExists: true ) )
         }
 
         // create channel from params.uniref_db
@@ -189,8 +189,8 @@ workflow BIOBAKERYMGX {
         ch_genefamilies_tsv = FASTQ_MICROBIAL_PATHWAY_HUMANN(
             ch_preprocessed_fastq_gz,
             ch_read_taxonomy_tsv,
-            ch_chochophlan_db,
-            params.chochophlan_db_version,
+            ch_chocophlan_db,
+            params.chocophlan_db_version,
             ch_uniref_db,
             params.uniref_db_version).humann_genefamilies
         ch_ec_tsv = FASTQ_MICROBIAL_PATHWAY_HUMANN.out.humann_ec
