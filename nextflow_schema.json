@@ -124,10 +124,18 @@
                     "type": "boolean",
                     "description": "Run HUMAnN to assess functional capacity of a metagenome?"
                 },
+                "chocophlan_db": {
+                    "type": "string",
+                    "description": "Path to pre-downloaded ChocoPhlAn database"
+                },
                 "chocophlan_db_version": {
                     "type": "string",
                     "default": "DEMO",
                     "description": "ChocoPhlAn database version to download"
+                },
+                "uniref_db": {
+                    "type": "string",
+                    "description": "Path to pre-downloaded UNIREF database"
                 },
                 "uniref_db_version": {
                     "type": "string",
