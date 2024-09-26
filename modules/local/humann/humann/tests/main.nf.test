@@ -15,7 +15,7 @@ nextflow_process {
             script "../../downloadchocophlandb/main.nf"
             process {
                 """
-                input[0] = 'TODO - some chochophlan db version - or maybe skip this setup and build in a mini test db'
+                input[0] = 'TODO - some chocophlan db version - or maybe skip this setup and build in a mini test db'
                 """
             }
         }

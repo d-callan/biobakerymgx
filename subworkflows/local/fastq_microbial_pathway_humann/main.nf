@@ -34,7 +34,7 @@ workflow FASTQ_MICROBIAL_PATHWAY_HUMANN {
         //
         // MODULE: Download ChocoPhlAn database
         //
-        ch_chocophlan_db = HUMANN_DOWNLOADCHOCOPHLANDB ( chocophlan_db_version ).chochophlan_db
+        ch_chocophlan_db = HUMANN_DOWNLOADCHOCOPHLANDB ( chocophlan_db_version ).chocophlan_db
         ch_versions = ch_versions.mix(HUMANN_DOWNLOADCHOCOPHLANDB.out.versions)
     }
 
@@ -52,7 +52,7 @@ workflow FASTQ_MICROBIAL_PATHWAY_HUMANN {
     //
     // MODULE: Run HUMAnN 3 for raw outputs
     //
-    ch_humann_genefamilies_raw = HUMANN_HUMANN ( processed_reads_fastq_gz, metaphlan_profile, ch_chochophlan_db, ch_uniref_db ).genefamilies
+    ch_humann_genefamilies_raw = HUMANN_HUMANN ( processed_reads_fastq_gz, metaphlan_profile, ch_chocophlan_db, ch_uniref_db ).genefamilies
     ch_humann_pathabundance_raw = HUMANN_HUMANN.out.pathabundance
     ch_humann_pathcoverage_raw = HUMANN_HUMANN.out.pathcoverage // TODO is this still right? looking at humann docs, might not get this file any longer?
     ch_humann_logs = HUMANN_HUMANN.out.log
