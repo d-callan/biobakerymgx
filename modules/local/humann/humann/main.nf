@@ -26,9 +26,10 @@ process HUMANN_HUMANN {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def input_data  = !meta.single_end ? "--input ${reads[0]} --input ${reads[1]}" : "--input $reads"
     """
     humann \\
-        --input ${reads} \\
+        ${input_data} \\
         --output ./ \\
         --threads ${task.cpus} \\
         --taxonomic-profile ${metaphlan_profile} \\
