@@ -84,7 +84,7 @@ workflow FASTQ_MICROBIAL_PATHWAY_HUMANN {
     //
     // MODULE: join gene abundances across all samples into one file
     //
-    ch_humann_genefamilies_joined = JOIN_GENES(ch_humann_genefamilies_cpm, 'genefamilies').joined
+    ch_humann_genefamilies_joined = JOIN_GENES(ch_humann_genefamilies_cpm, 'cpm').joined
 
     //
     // MODULE: join ec abundances across all samples into one file
