@@ -84,28 +84,22 @@ workflow FASTQ_MICROBIAL_PATHWAY_HUMANN {
     //
     // MODULE: join gene abundances across all samples into one file
     //
-    // the paths should all be the same, so im taking the first.
-    // should probably be validated though, im just short of time..
-    ch_humann_genefamilies_cpm_path = ch_humann_genefamilies_cpm.map{ toCanonicalPath(it[1]) }.unique().take(1)
-    ch_humann_genefamilies_joined = JOIN_GENES(ch_humann_genefamilies_cpm_path, 'genefamilies').joined
+    ch_humann_genefamilies_joined = JOIN_GENES('genefamilies').joined
 
     //
     // MODULE: join ec abundances across all samples into one file
     //
-    ch_humann_ec_renamed_path = ch_humann_ec_renamed.map{ toCanonicalPath(it[1]) }.unique().take(1)
-    ch_humann_ec_joined = JOIN_EC(ch_humann_ec_renamed_path, 'ec').joined // TODO check the file name pattern
+    ch_humann_ec_joined = JOIN_EC('ec').joined // TODO check the file name pattern
 
     //
     // MODULE: join pathway abundances across all samples into one file
     //
-    ch_humann_pathabundance_path = ch_humann_pathabundance_raw.map{ toCanonicalPath(it[1]) }.unique().take(1)
-    ch_humann_pathabundance_joined = JOIN_PATHABUND(ch_humann_pathabundance_path, 'pathabundance').joined
+    ch_humann_pathabundance_joined = JOIN_PATHABUND('pathabundance').joined
 
     //
     // MODULE: join pathway coverage across all samples into one file
     //
-    ch_humann_pathcoverage_path = ch_humann_pathcoverage_raw.map{ toCanonicalPath(it[1]) }.unique().take(1)
-    ch_humann_pathcoverage_joined = JOIN_PATHCOV(ch_humann_pathcoverage_path, 'pathcoverage').joined
+    ch_humann_pathcoverage_joined = JOIN_PATHCOV('pathcoverage').joined
 
     emit:
     humann_genefamilies       = ch_humann_genefamilies_joined     // channel: [ val(meta), genefamilies.tsv ]
