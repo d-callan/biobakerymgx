@@ -20,7 +20,7 @@ process HUMANN_RENAME {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     humann_rename_table \\
-        --input input.tsv \\
+        --input $input \\
         --output ${prefix}_${names}_rename.tsv \\
         --names $names \\
         ${args}

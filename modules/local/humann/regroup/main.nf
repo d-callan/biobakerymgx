@@ -20,7 +20,7 @@ process HUMANN_REGROUP {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     humann_regroup_table \\
-        --input input.tsv \\
+        --input $input \\
         --output ${prefix}_${groups}_regroup.tsv \\
         --groups $groups \\
         ${args}

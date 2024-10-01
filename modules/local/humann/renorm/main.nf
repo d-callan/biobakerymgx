@@ -20,7 +20,7 @@ process HUMANN_RENORM {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     humann_renorm_table \\
-        --input input.tsv \\
+        --input $input \\
         --output ${prefix}_${units}_renorm.tsv \\
         --units $units \\
         --update-snames \\
