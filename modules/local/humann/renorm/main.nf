@@ -25,8 +25,10 @@ process HUMANN_RENORM {
         --units $units \\
         --update-snames \\
         ${args}
-    stub:
-    def args = task.ext.args ?: ''
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        humann: \$(echo \$(humann --version 2>&1 | sed 's/^.*humann //; s/Using.*\$//' ))
+    END_VERSIONS
     """
 
     stub:
