@@ -14,8 +14,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = TODO - first is a path to a dir w files matching the below pattern
-                input[1] = "genefamilies"
+                input[0] = "genefamilies"
                 """
             }
         }
@@ -40,8 +39,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = TODO - first is a path to a dir w files matching the below pattern
-                input[1] = "genefamilies"
+                input[0] = "genefamilies"
                 """
             }
         }
