@@ -7,7 +7,7 @@ process HUMANN_JOIN {
         'biocontainers/humann:3.8--pyh7cba7a3_0' }"
 
     input:
-    path(input)
+    tuple val(meta), path(input)
     val file_name_pattern
 
     output:
@@ -17,7 +17,7 @@ process HUMANN_JOIN {
     script:
     def args = task.ext.args ?: ''
     """
-    humann_join_table \\
+    humann_join_tables \\
         --input . \\
         --output ${file_name_pattern}_joined.tsv \\
         --file_name $file_name_pattern \\
