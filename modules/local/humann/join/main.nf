@@ -7,6 +7,7 @@ process HUMANN_JOIN {
         'biocontainers/humann:3.8--pyh7cba7a3_0' }"
 
     input:
+    path(input)
     val file_name_pattern
 
     output:

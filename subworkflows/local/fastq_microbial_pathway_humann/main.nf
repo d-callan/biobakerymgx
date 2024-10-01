@@ -84,22 +84,22 @@ workflow FASTQ_MICROBIAL_PATHWAY_HUMANN {
     //
     // MODULE: join gene abundances across all samples into one file
     //
-    ch_humann_genefamilies_joined = JOIN_GENES('genefamilies').joined
+    ch_humann_genefamilies_joined = JOIN_GENES(ch_humann_genefamilies_cpm, 'genefamilies').joined
 
     //
     // MODULE: join ec abundances across all samples into one file
     //
-    ch_humann_ec_joined = JOIN_EC('ec').joined // TODO check the file name pattern
+    ch_humann_ec_joined = JOIN_EC(ch_humann_ec_renamed, 'ec').joined // TODO check the file name pattern
 
     //
     // MODULE: join pathway abundances across all samples into one file
     //
-    ch_humann_pathabundance_joined = JOIN_PATHABUND('pathabundance').joined
+    ch_humann_pathabundance_joined = JOIN_PATHABUND(ch_humann_pathabundance_raw, 'pathabundance').joined
 
     //
     // MODULE: join pathway coverage across all samples into one file
     //
-    ch_humann_pathcoverage_joined = JOIN_PATHCOV('pathcoverage').joined
+    ch_humann_pathcoverage_joined = JOIN_PATHCOV(ch_humann_pathcoverage_raw, 'pathcoverage').joined
 
     emit:
     humann_genefamilies       = ch_humann_genefamilies_joined     // channel: [ val(meta), genefamilies.tsv ]
