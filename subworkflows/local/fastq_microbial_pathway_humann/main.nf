@@ -72,7 +72,7 @@ workflow FASTQ_MICROBIAL_PATHWAY_HUMANN {
     //
     // MODULE: regroup cpm gene families to EC numbers
     //
-    ch_humann_ec = HUMANN_REGROUP(ch_humann_genefamilies_cpm, 'ec').regroup // TODO make sure 'ec' is still valid arg
+    ch_humann_ec = HUMANN_REGROUP(ch_humann_genefamilies_cpm, 'uniref90_rxn').regroup
     ch_versions = ch_versions.mix(HUMANN_REGROUP.out.versions)
 
     //
